@@ -1,6 +1,7 @@
-[![Build](https://github.com/dirkvdb/ffmpegthumbnailer/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/dirkvdb/ffmpegthumbnailer/actions/workflows/build.yml)
-
+# Rockchip
 This fork inteded to build with rockchip ffmpeg from https://github.com/nyanmisaka/ffmpeg-rockchip.git
+
+# Description
 
 FFmpegthumbnailer is a lightweight video thumbnailer that can be used by file
 managers to create thumbnails for your video files. The thumbnailer uses ffmpeg
