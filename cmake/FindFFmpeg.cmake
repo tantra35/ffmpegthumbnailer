@@ -5,11 +5,65 @@ pkg_check_modules(AVCODEC libavcodec)
 pkg_check_modules(AVFORMAT libavformat)
 pkg_check_modules(AVUTIL libavutil)
 pkg_check_modules(AVFILTER libavfilter)
+pkg_check_modules(SWRRESAMPLE libswresample)
+pkg_check_modules(POSTPROC libpostproc)
+pkg_check_modules(SWSCALE libswscale)
+pkg_check_modules(RKMPP rockchip_mpp)
+pkg_check_modules(RGA librga)
+pkg_check_modules(DRM libdrm)
 
 find_package_handle_standard_args(FFmpeg
     FOUND_VAR FFmpeg_FOUND
-    REQUIRED_VARS AVCODEC_FOUND AVFORMAT_FOUND AVUTIL_FOUND AVFILTER_FOUND
+    REQUIRED_VARS AVCODEC_FOUND AVFORMAT_FOUND AVUTIL_FOUND AVFILTER_FOUND RKMPP_FOUND SWRRESAMPLE_FOUND SWSCALE_FOUND RGA_FOUND POSTPROC_FOUND DRM_FOUND
 )
+
+FIND_LIBRARY(RKMPP_LIBRARY_PATH
+    NAMES ${RKMPP_LIBRARIES}
+    PATHS ${RKMPP_LIBRARY_DIRS}
+)
+if (NOT RKMPP_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full rockchip_mpp library path")
+endif ()
+
+FIND_LIBRARY(RGA_LIBRARY_PATH
+    NAMES ${RGA_LIBRARIES}
+    PATHS ${RGA_LIBRARY_DIRS}
+)
+if (NOT RGA_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full rga library path")
+endif ()
+
+FIND_LIBRARY(DRM_LIBRARY_PATH
+    NAMES ${DRM_LIBRARIES}
+    PATHS ${DRM_LIBRARY_DIRS}
+)
+if (NOT DRM_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full drm library path")
+endif ()
+
+FIND_LIBRARY(POSTPROC_LIBRARY_PATH
+    NAMES ${POSTPROC_LIBRARIES}
+    PATHS ${POSTPROC_LIBRARY_DIRS}
+)
+if (NOT POSTPROC_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full postproc library path")
+endif ()
+
+FIND_LIBRARY(SWRRESAMPLE_LIBRARY_PATH
+    NAMES ${SWRRESAMPLE_LIBRARIES}
+    PATHS ${SWRRESAMPLE_LIBRARY_DIRS}
+)
+if (NOT SWRRESAMPLE_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full swresample library path")
+endif ()
+
+FIND_LIBRARY(SWSCALE_LIBRARY_PATH
+    NAMES ${SWSCALE_LIBRARIES}
+    PATHS ${SWSCALE_LIBRARY_DIRS}
+)
+if (NOT SWSCALE_LIBRARY_PATH)
+    message(FATAL_ERROR "Could not determine full swscale library path")
+endif ()
 
 FIND_LIBRARY(AVCODEC_LIBRARY_PATH
     NAMES ${AVCODEC_LIBRARIES}
@@ -48,13 +102,98 @@ mark_as_advanced(
     AVUTIL_LIBRARY_PATH
     AVCODEC_LIBRARY_PATH
     AVFILTER_LIBRARY_PATH
+    SWRRESAMPLE_LIBRARY_PATH
+    SWSCALE_LIBRARY_PATH
+    POSTPROC_LIBRARY_PATH
+    POSTPROC_LIBRARY_PATH
+    RKMPP_LIBRARY_PATH
+    RGA_LIBRARY_PATH
+    DRM_LIBRARY_PATH
 )
 
 message(STATUS "FFmpeg found: ${FFmpeg_FOUND}")
-message(STATUS "  avcodec:  ${AVCODEC_LIBRARY_PATH}")
-message(STATUS "  avformat: ${AVFORMAT_LIBRARY_PATH}")
-message(STATUS "  avfilter: ${AVFILTER_LIBRARY_PATH}")
-message(STATUS "  avutil:   ${AVUTIL_LIBRARY_PATH}")
+message(STATUS "  avcodec:      ${AVCODEC_LIBRARY_PATH}")
+message(STATUS "  avformat:     ${AVFORMAT_LIBRARY_PATH}")
+message(STATUS "  avfilter:     ${AVFILTER_LIBRARY_PATH}")
+message(STATUS "  avutil:       ${AVUTIL_LIBRARY_PATH}")
+message(STATUS "  swresample:   ${SWRRESAMPLE_LIBRARY_PATH}")
+message(STATUS "  swscalee:     ${SWSCALE_LIBRARY_PATH}")
+message(STATUS "  postproc:     ${POSTPROC_LIBRARY_PATH}")
+message(STATUS "  rockchip_mpp: ${RKMPP_LIBRARY_PATH}")
+message(STATUS "  rga:          ${RGA_LIBRARY_PATH}")
+message(STATUS "  drm:          ${DRM_LIBRARY_PATH}")
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::rkmpp)
+    add_library(FFmpeg::rkmpp UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::rkmpp PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${RKMPP_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${RKMPP_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${RKMPP_LIBRARY_PATH}
+        LINK_FLAGS "${RKMPP_LDFLAGS}"
+    )
+endif()
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::rga)
+    add_library(FFmpeg::rga UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::rga PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${RGA_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${RGA_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${RGA_LIBRARY_PATH}
+        LINK_FLAGS "${RGA_LDFLAGS}"
+    )
+endif()
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::drm)
+    add_library(FFmpeg::drm UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::drm PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${DRM_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${DRM_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${DRM_LIBRARY_PATH}
+        LINK_FLAGS "${DRM_LDFLAGS}"
+    )
+endif()
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::swresample)
+    add_library(FFmpeg::swresample UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::swresample PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${SWRRESAMPLE_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${SWRRESAMPLE_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${SWRRESAMPLE_LIBRARY_PATH}
+        LINK_FLAGS "${SWRRESAMPLE_LDFLAGS}"
+    )
+endif()
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::postproc)
+    add_library(FFmpeg::postproc UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::postproc PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${POSTPROC_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${POSTPROC_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${POSTPROC_LIBRARY_PATH}
+        LINK_FLAGS "${POSTPROC_LDFLAGS}"
+    )
+endif()
+
+if(FFmpeg_FOUND AND NOT TARGET FFmpeg::swscale)
+    add_library(FFmpeg::swscale UNKNOWN IMPORTED)
+    set_target_properties(FFmpeg::swscale PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        INTERFACE_INCLUDE_DIRECTORIES "${SWSCALE_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS __STDC_CONSTANT_MACROS
+        INTERFACE_COMPILE_OPTIONS "${SWSCALE_CFLAGS_OTHER}"
+        IMPORTED_LOCATION ${SWSCALE_LIBRARY_PATH}
+        LINK_FLAGS "${SWSCALE_LDFLAGS}"
+    )
+endif()
 
 if(FFmpeg_FOUND AND NOT TARGET FFmpeg::avformat)
     add_library(FFmpeg::avformat UNKNOWN IMPORTED)

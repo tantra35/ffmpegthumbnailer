@@ -94,9 +94,15 @@ add_library(libffmpegthumbnailerobj OBJECT
 
 target_link_libraries(libffmpegthumbnailerobj
     FFmpeg::avformat
-    FFmpeg::avcodec
-    FFmpeg::avutil
     FFmpeg::avfilter
+    FFmpeg::avcodec
+    FFmpeg::swresample
+    FFmpeg::swscale
+    FFmpeg::postproc
+    FFmpeg::avutil
+    FFmpeg::drm
+    FFmpeg::rkmpp
+    FFmpeg::rga
     $<TARGET_NAME_IF_EXISTS:JPEG::JPEG>
     $<TARGET_NAME_IF_EXISTS:PNG::PNG>
 )
@@ -137,7 +143,7 @@ if (ENABLE_STATIC)
     target_include_directories(libffmpegthumbnailerstatic
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    )   
+    )
     set (STATIC_LIB libffmpegthumbnailerstatic)
 endif ()
 
